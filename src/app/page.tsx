@@ -70,7 +70,7 @@ export default function Home() {
           Samen brengen we jouw visie tot leven.
         </p>
         <Button asChild>
-          <a href="/api/download-cv" download>
+          <a href="/Kenny-Timmer-CV.pdf" download>
             Download CV
           </a>
         </Button>
