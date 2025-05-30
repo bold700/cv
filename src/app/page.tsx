@@ -76,26 +76,32 @@ export default function Home() {
         </Button>
       </CardContent>
     </Card>,
-    <Card className="max-w-full break-words p-0" key="werkervaring">
-      <CardHeader>
-        <CardTitle className="pt-4">Werkervaring</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="grid grid-cols-1 gap-4">
-          {werkervaring.map((job, i) => (
-            <div key={i} className="border rounded-lg p-4 bg-muted/50">
-              <div className="font-semibold text-sm text-muted-foreground mb-1">{job.periode}</div>
-              <div className="font-bold mb-2">{job.functie}</div>
-              <ul className="list-disc pl-5 text-sm space-y-1">
-                {job.taken.map((taak, j) => (
-                  <li key={j}>{taak}</li>
-                ))}
-              </ul>
-            </div>
-          ))}
-        </div>
-      </CardContent>
-    </Card>,
+     <Card className="max-w-full break-words p-0" key="opleidingen">
+     <CardHeader>
+       <CardTitle className="pt-4">Opleidingen</CardTitle>
+     </CardHeader>
+     <CardContent>
+       <div className="grid grid-cols-1 gap-4 mb-4">
+         {opleidingen.map((o, i) => (
+           <div key={i} className="border rounded-lg p-4 bg-muted/50">
+             <div className="font-semibold">{o.naam}</div>
+             <div className="text-sm text-muted-foreground mb-1">{o.periode}</div>
+             <div className="text-sm">Diploma: {o.diploma ? 'ja' : 'nee'}</div>
+           </div>
+         ))}
+       </div>
+       <div className="font-semibold mb-2">Cursussen</div>
+       <div className="grid grid-cols-1 gap-4">
+         {cursussen.map((c, i) => (
+           <div key={i} className="border rounded-lg p-4 bg-muted/50">
+             <div className="font-semibold">{c.naam}</div>
+             <div className="text-sm text-muted-foreground mb-1">{c.jaar}</div>
+             <div className="text-sm">Certificaat: {c.certificaat ? 'ja' : 'nee'}</div>
+           </div>
+         ))}
+       </div>
+     </CardContent>
+   </Card>,
     <Card className="max-w-full break-words p-0" key="skills">
     <CardHeader>
       <CardTitle className="pt-4">Designvaardigheden</CardTitle>
@@ -118,33 +124,60 @@ export default function Home() {
       </div>
     </CardContent>
   </Card>,
+  
+    
+  <Card className="max-w-full break-words p-0" id="contact" key="contact">
+  <CardHeader>
+    <CardTitle className="pt-4">Contactgegevens</CardTitle>
+  </CardHeader>
+  <CardContent>
+    <dl className="grid grid-cols-2 gap-x-4 gap-y-2">
+      {contact.map((c) => (
+        <React.Fragment key={c.label}>
+          <dt className="font-medium">{c.label}</dt>
+          <dd>
+            {c.link ? (
+              <a href={c.link} className="underline" target="_blank" rel="noopener noreferrer">{c.value}</a>
+            ) : (
+              c.value.split("\n").map((line, j) => (
+                <span key={j}>
+                  {line}
+                  {j !== c.value.split("\n").length - 1 && <br />}
+                </span>
+              ))
+            )}
+          </dd>
+        </React.Fragment>
+      ))}
+    </dl>
+  </CardContent>
+</Card>,
     <Card className="max-w-full break-words p-0" key={"hobby-"+hobby[0].titel}>
     <CardHeader>
       <CardTitle className="pt-4">{hobby[0].titel}</CardTitle>
     </CardHeader>
     <CardContent>{hobby[0].tekst}</CardContent>
   </Card>,
-    <Card className="max-w-full break-words p-0" key="opleidingen">
+  
+  (
+    hobby[1]
+      ? [<Card className="max-w-full break-words p-0" key={"hobby-"+hobby[1].titel}><CardHeader><CardTitle className="pt-4">{hobby[1].titel}</CardTitle></CardHeader><CardContent>{hobby[1].tekst}</CardContent></Card>]
+      : []
+  )   ,
+    <Card className="max-w-full break-words p-0" key="talen">
       <CardHeader>
-        <CardTitle className="pt-4">Opleidingen</CardTitle>
+        <CardTitle className="pt-4">Talen</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-1 gap-4 mb-4">
-          {opleidingen.map((o, i) => (
-            <div key={i} className="border rounded-lg p-4 bg-muted/50">
-              <div className="font-semibold">{o.naam}</div>
-              <div className="text-sm text-muted-foreground mb-1">{o.periode}</div>
-              <div className="text-sm">Diploma: {o.diploma ? 'ja' : 'nee'}</div>
-            </div>
-          ))}
-        </div>
-        <div className="font-semibold mb-2">Cursussen</div>
         <div className="grid grid-cols-1 gap-4">
-          {cursussen.map((c, i) => (
+          {talen.map((t, i) => (
             <div key={i} className="border rounded-lg p-4 bg-muted/50">
-              <div className="font-semibold">{c.naam}</div>
-              <div className="text-sm text-muted-foreground mb-1">{c.jaar}</div>
-              <div className="text-sm">Certificaat: {c.certificaat ? 'ja' : 'nee'}</div>
+              <div className="font-semibold mb-2">{t.taal}</div>
+              <ul className="text-sm space-y-1">
+                <li><span className="font-medium">Spreken:</span> {t.spreken}</li>
+                <li><span className="font-medium">Schrijven:</span> {t.schrijven}</li>
+                <li><span className="font-medium">Lezen:</span> {t.lezen}</li>
+              </ul>
             </div>
           ))}
         </div>
@@ -165,60 +198,28 @@ export default function Home() {
       </ul>
     </CardContent>
   </Card>,
-  ...(
-    hobby[1]
-      ? [<Card className="max-w-full break-words p-0" key={"hobby-"+hobby[1].titel}><CardHeader><CardTitle className="pt-4">{hobby[1].titel}</CardTitle></CardHeader><CardContent>{hobby[1].tekst}</CardContent></Card>]
-      : []
-  )
-    // Kolom 2
-    ,
-    <Card className="max-w-full break-words p-0" key="talen">
-      <CardHeader>
-        <CardTitle className="pt-4">Talen</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="grid grid-cols-1 gap-4">
-          {talen.map((t, i) => (
-            <div key={i} className="border rounded-lg p-4 bg-muted/50">
-              <div className="font-semibold mb-2">{t.taal}</div>
-              <ul className="text-sm space-y-1">
-                <li><span className="font-medium">Spreken:</span> {t.spreken}</li>
-                <li><span className="font-medium">Schrijven:</span> {t.schrijven}</li>
-                <li><span className="font-medium">Lezen:</span> {t.lezen}</li>
-              </ul>
-            </div>
-          ))}
+  
+  <Card className="max-w-full break-words p-0" key="werkervaring">
+  <CardHeader>
+    <CardTitle className="pt-4">Werkervaring</CardTitle>
+  </CardHeader>
+  <CardContent>
+    <div className="grid grid-cols-1 gap-4">
+      {werkervaring.map((job, i) => (
+        <div key={i} className="border rounded-lg p-4 bg-muted/50">
+          <div className="font-semibold text-sm text-muted-foreground mb-1">{job.periode}</div>
+          <div className="font-bold mb-2">{job.functie}</div>
+          <ul className="list-disc pl-5 text-sm space-y-1">
+            {job.taken.map((taak, j) => (
+              <li key={j}>{taak}</li>
+            ))}
+          </ul>
         </div>
-      </CardContent>
-    </Card>,
-    // Kolom 3
-    <Card className="max-w-full break-words p-0" id="contact" key="contact">
-      <CardHeader>
-        <CardTitle className="pt-4">Contactgegevens</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <dl className="grid grid-cols-2 gap-x-4 gap-y-2">
-          {contact.map((c) => (
-            <React.Fragment key={c.label}>
-              <dt className="font-medium">{c.label}</dt>
-              <dd>
-                {c.link ? (
-                  <a href={c.link} className="underline" target="_blank" rel="noopener noreferrer">{c.value}</a>
-                ) : (
-                  c.value.split("\n").map((line, j) => (
-                    <span key={j}>
-                      {line}
-                      {j !== c.value.split("\n").length - 1 && <br />}
-                    </span>
-                  ))
-                )}
-              </dd>
-            </React.Fragment>
-          ))}
-        </dl>
-      </CardContent>
-    </Card>,
-    // Kolom 3 (laatste): Werkervaring
+      ))}
+    </div>
+  </CardContent>
+</Card>,
+    
     
   ]
 
