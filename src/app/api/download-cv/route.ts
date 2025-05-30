@@ -1,24 +1,46 @@
-import { NextResponse } from "next/server"
-import { PDFDocument, rgb, StandardFonts, PDFFont, RGB } from "pdf-lib"
-import { werkervaring, opleidingen, cursussen, vaardigheden, designSkills, talen, hobby, contact } from "@/lib/cv-data"
-import fs from "fs"
-import path from "path"
+import { NextResponse } from 'next/server'
+import { PDFDocument, rgb, StandardFonts, PDFFont, RGB } from 'pdf-lib'
+import { werkervaring, opleidingen, cursussen, vaardigheden, designSkills, talen, hobby, contact } from '@/lib/cv-data'
+import fs from 'fs'
+import path from 'path'
 
 export async function GET() {
-  // PDF genereren
   const width = 595, height = 842 // A4 portrait
   const margin = 48
-  const cardPad = 16
-  const cardBg = rgb(0.97,0.97,1)
   const pdfDoc = await PDFDocument.create()
   let page = pdfDoc.addPage([width, height])
   const font = await pdfDoc.embedFont(StandardFonts.Helvetica)
   const fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold)
   let y = height - margin
 
-  function newPage() {
-    page = pdfDoc.addPage([width, height])
-    y = height - margin
+  // Profielfoto toevoegen (originele verhouding, gecentreerd, geen cirkel)
+  const imagePath = path.join(process.cwd(), "public", "profielfoto.png")
+  if (fs.existsSync(imagePath)) {
+    const imageBytes = fs.readFileSync(imagePath)
+    const pngImage = await pdfDoc.embedPng(imageBytes)
+    const imgDims = pngImage.scale(1)
+    // Max breedte/hoogte instellen zodat hij niet te groot wordt
+    let maxWidth = 120
+    let maxHeight = 120
+    let scale = Math.min(maxWidth / imgDims.width, maxHeight / imgDims.height, 1)
+    let drawWidth = imgDims.width * scale
+    let drawHeight = imgDims.height * scale
+    let x = (width - drawWidth) / 2
+    let yImg = y - drawHeight
+    page.drawImage(pngImage, {
+      x,
+      y: yImg,
+      width: drawWidth,
+      height: drawHeight
+    })
+    y = yImg - 32 // Extra ruimte onder de foto
+  }
+
+  function drawCenteredText(text: string, yPos: number, size: number, fontObj: PDFFont, color: RGB) {
+    const textWidth = fontObj.widthOfTextAtSize(text, size)
+    const x = (width - textWidth) / 2
+    page.drawText(text, { x, y: yPos, size, font: fontObj, color })
+    return yPos - size - 2
   }
 
   function drawWrappedText(text: string, x: number, yStart: number, maxWidth: number, size: number, fontObj: PDFFont, color: RGB) {
@@ -43,28 +65,6 @@ export async function GET() {
     return yPos
   }
 
-  function drawCard(title: string, drawContent: (y: number, x: number, w: number) => number) {
-    const cardLeft = margin
-    const cardWidth = width - 2 * margin
-    let cardY = y - cardPad
-    // Simuleer waar de tekst eindigt (zonder te tekenen)
-    let simY = cardY
-    simY = simY - 20 - 4; // Titel
-    simY = drawContent(simY, cardLeft + cardPad, cardWidth - 2 * cardPad)
-    const cardHeight = (y - cardPad) - simY + 2 * cardPad
-    // Teken eerst de achtergrond
-    page.drawRectangle({ x: cardLeft, y: y - cardHeight, width: cardWidth, height: cardHeight, color: cardBg, borderColor: rgb(0.85,0.85,0.95), borderWidth: 1 })
-    // Teken nu de tekst
-    cardY = y - cardPad
-    cardY = drawWrappedText(title, cardLeft + cardPad, cardY, cardWidth - 2 * cardPad, 20, fontBold, rgb(0.1,0.1,0.5))
-    cardY -= 4
-    cardY = drawContent(cardY, cardLeft + cardPad, cardWidth - 2 * cardPad)
-    y = cardY - 2 * cardPad
-    if (y < margin + 80) newPage()
-    y -= 12
-  }
-
-  // Helper voor page break
   function checkPageBreak(extra = 0) {
     if (y < margin + extra + 40) {
       page = pdfDoc.addPage([width, height]);
@@ -72,9 +72,9 @@ export async function GET() {
     }
   }
 
-  // Titel
-  y = drawWrappedText("Kenny Timmer", margin, y, width - 2 * margin, 28, fontBold, rgb(0.1,0.1,0.5));
-  y = drawWrappedText("CV", margin, y, width - 2 * margin, 18, fontBold, rgb(0.1,0.1,0.5));
+  // Naam en titel gecentreerd onder de foto
+  y = drawCenteredText("Kenny Timmer", y, 28, fontBold, rgb(0.1,0.1,0.5));
+  y = drawCenteredText("CV", y, 18, fontBold, rgb(0.1,0.1,0.5));
   y -= 16;
 
   // Contactgegevens
@@ -151,28 +151,12 @@ export async function GET() {
     y = drawWrappedText(`${h.titel}: ${h.tekst}`, margin, y, width - 2 * margin, 12, font, rgb(0,0,0));
   });
 
-  // Profielfoto toevoegen (alleen op eerste pagina)
-  const imagePath = path.join(process.cwd(), "public", "profielfoto.png")
-  if (fs.existsSync(imagePath)) {
-    const imageBytes = fs.readFileSync(imagePath)
-    const jpgImage = await pdfDoc.embedJpg(imageBytes)
-    const imgWidth = 100, imgHeight = 100
-    page.drawImage(jpgImage, {
-      x: margin,
-      y: height - margin - imgHeight,
-      width: imgWidth,
-      height: imgHeight
-    })
-    // Verschuif y zodat tekst niet over de foto komt
-    y = height - margin - imgHeight - 16
-  }
-
   const pdfBytes = await pdfDoc.save()
-  return new NextResponse(pdfBytes, {
+  return new NextResponse(Buffer.from(pdfBytes), {
     status: 200,
     headers: {
-      "Content-Type": "application/pdf",
-      "Content-Disposition": "attachment; filename=Kenny-Timmer-CV.pdf"
+      'Content-Type': 'application/pdf',
+      'Content-Disposition': 'attachment; filename=Kenny-Timmer-CV.pdf'
     }
   })
 } 
