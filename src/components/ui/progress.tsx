@@ -1,4 +1,7 @@
+"use client"
+
 import * as React from "react"
+import { motion } from "framer-motion"
 
 import { cn } from "@/lib/utils"
 
@@ -20,9 +23,11 @@ const Progress = React.forwardRef<HTMLDivElement, ProgressProps>(
       )}
       {...props}
     >
-      <div
+      <motion.div
         className="h-full bg-primary transition-all"
-        style={{ width: `${value}%` }}
+        initial={{ width: 0 }}
+        animate={{ width: `${value}%` }}
+        transition={{ duration: 1, ease: 'easeOut' }}
       />
     </div>
   )
